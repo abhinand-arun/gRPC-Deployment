@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-go-app-deployment
+  labels:
+    app: my-go-app
+  namespace: micro-namespace # Specify the namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-go-app
+  template:
+    metadata:
+      labels:
+        app: my-go-app
+    spec:
+      containers:
+      - name: my-go-app
+        image: abhinandarun/my-go-app:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ENV_VAR_NAME
+          value: "some-value"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-go-app-service
+  namespace: micro-namespace # Specify the namespace
+spec:
+  selector:
+    app: my-go-app
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-go-app-ingress
+  namespace: micro-namespace # Specify the namespace
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: ee41-2406-8800-9014-1c71-df77-3601-82c4-9cab.ngrok-free.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-go-app-service
+            port:
+              number: 8080

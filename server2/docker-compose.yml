@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  grpc-server-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Build the 'builder' stage
+    networks:
+      - micro-namespace  # Use the custom network (namespace)
+
+  grpc-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - grpc-server-builder
+    networks:
+      - micro-namespace  # Use the custom network (namespace)
+    ports:
+      - "50051:50051"  # Expose gRPC server port
+
+networks:
+  my-go-app-namespace:
+    driver: bridge  # Custom network (namespace) for your services
