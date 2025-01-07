@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 
 const (
 	// grpcServerAddress = "localhost:50051"
-	grpcServerAddress = "localhost:50051"
+	defaultGrpcServerAddress = "localhost:50051"
 )
 
 func main() {
@@ -24,6 +25,11 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 
 		// Create a gRPC client connection
+		grpcServerAddress := os.Getenv("GRPC_SERVER_ADDRESS")
+		if grpcServerAddress == "" {
+			grpcServerAddress = defaultGrpcServerAddress
+		}
+
 		conn, err := grpc.Dial(grpcServerAddress, grpc.WithInsecure(), grpc.WithTimeout(10*time.Second))
 		if err != nil {
 			log.Fatalf("could not connect to gRPC server: %v", err)
